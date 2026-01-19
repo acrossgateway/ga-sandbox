@@ -24,11 +24,12 @@ jobs:
         mkdir sample
         cd sample
         echo $githubJson |jq . > github.json
+        yq -o json ./github/workflows/cache.yml |jq -c > workflow.json
 
     - uses: actions/upload-artifact@v4
       with:
         name: sample-${{ github.run_id }}
-        path: sample
+        path: sample/**
 
     - name: create git.json
       env:
@@ -40,7 +41,9 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ github.run_id }}-json.tgz
-        path: json.tgz
+        path: |
+          json.tgz
+          git.json
 
     - name: clear
       run: |
@@ -48,12 +51,6 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: sample-${{ github.run_id }}
-        path: sample
-
-    - uses: actions/download-artifact@v4
-      with:
-        name: ${{ github.run_id }}-json.tgz
         path: .
 
     - name: check
