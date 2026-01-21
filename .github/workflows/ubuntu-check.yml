@@ -17,9 +17,6 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4
 
-    - name: call action
-      uses: ./.github/actions/clean-artifacts
-
     - name: create github.json
       env:
         githubJson : ${{ toJson(github) }}
@@ -64,22 +61,24 @@ jobs:
         stepsJson: ${{ toJson(steps) }}
       run: |
         ls -lR
-
-        ARTIFACT_IDS=$(gh api repos/${{ github.repository }}/actions/artifacts --jq ".artifacts[] | select(.workflow_run.id == ${{ github.run_id }}) | .id")
+        gh api repos/${{ github.repository }}/actions/artifacts
         
-        for ID in $ARTIFACT_IDS; do
-          if [ -n "$ID" ]; then
-            echo "Deleting artifact ID: $ID"
-            gh api repos/${{ github.repository }}/actions/artifacts/$ID -X DELETE
-          fi
-        done
   post:
     needs: check
-    runs-on: ubuntu-latest
+    if: always()
+    runs-on: windows-latest
     steps:
       - name: result
+        shell: pwsh
         env:
           NEEDS_JSON: ${{ toJson(needs) }}
         run: |
           echo ${NEEDS_JSON}
+
+      - name: clean-artifacts
+        uses: ./.github/actions/clean-artifacts
+        with: 
+          gh-token: ${{ secrets.ACTION_GITHUB_TOKEN }}
+           
+
 

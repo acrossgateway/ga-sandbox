@@ -1,13 +1,51 @@
 name: cleanup-artifacts
 description: hello
 
+inputs:
+  gh-token:
+    required: true
+
 runs:
   using: composite
   steps:
-    - name: setup
-      id: setup
+    - name: cleanup-from-linux-runner
+      if: ${{ runner.os }} == 'Linux'
+      id: cleanup-on-linux
       shell: bash
       env: 
         runnerJson: "${{ toJson(runner)}}"
       run: |
         echo $runnerJson
+        echo ${{ github.run_id }}
+        echo ${{ github.repository }}
+
+        ARTIFACT_IDS=$(gh api repos/${{ github.repository }}/actions/artifacts --jq ".artifacts[] | select(.workflow_run.id == ${{ github.run_id }}) | .id")
+        
+        for ID in $ARTIFACT_IDS; do
+          if [ -n "$ID" ]; then
+            echo "Deleting artifact ID: $ID"
+            gh api repos/${{ github.repository }}/actions/artifacts/$ID -X DELETE
+          fi
+        done
+
+    - name: cleanup-from-windows-runner
+      if: ${{ runner.os }} == 'Windows'
+      id: cleanup-on-windows
+      shell: pwsh
+      env: 
+        runnerJson: "${{ toJson(runner)}}"
+      run: |
+        echo $runnerJson
+        echo ${{ github.run_id }}
+        echo ${{ github.repository }}
+
+        $artifacts = gh api "repos/${{ github.repository }}/actions/artifacts" --jq ".artifacts[] | select(.workflow_run.id == ${{ github.run_id }}) | .id") | ConvertFrom-Json
+
+        if ( -not $artifacts)
+        
+        foreach($id in $artifact)
+          if ($id)
+            echo "Deleting artifact ID: $ID"
+            gh api "repos/${{ github.repository }}/actions/artifacts/$id" -X DELETE
+          fi
+        done
