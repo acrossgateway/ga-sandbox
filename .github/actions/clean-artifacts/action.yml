@@ -43,7 +43,9 @@ runs:
 
         $artifacts = gh api "repos/${{ github.repository }}/actions/artifacts" --jq ".artifacts[] | select(.workflow_run.id == ${{ github.run_id }}) | .id" | ConvertFrom-Json
 
-        if ( -not $artifacts)
+        if ( -not $artifacts) {
+          echo "no artifacts found for run ${{ github.run_id }}"
+        }
         
         foreach($id in $artifact)
           if ($id)
