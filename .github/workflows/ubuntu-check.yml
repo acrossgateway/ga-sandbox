@@ -68,6 +68,9 @@ jobs:
     if: always()
     runs-on: windows-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
       - name: result
         shell: pwsh
         env:
