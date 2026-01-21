@@ -14,6 +14,7 @@ runs:
       shell: bash
       env: 
         runnerJson: "${{ toJson(runner)}}"
+        GH_TOKEN: "${{ inputs.gh-token }}"
       run: |
         echo $runnerJson
         echo ${{ github.run_id }}
@@ -34,6 +35,7 @@ runs:
       shell: pwsh
       env: 
         runnerJson: "${{ toJson(runner)}}"
+        GH_TOKEN: "${{ inputs.gh-token }}"
       run: |
         echo $runnerJson
         echo ${{ github.run_id }}
