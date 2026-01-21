@@ -1,0 +1,13 @@
+name: cleanup-artifacts
+description: hello
+
+runs:
+  using: composite
+  steps:
+    - name: setup
+      id: setup
+      shell: bash
+      env: 
+        runnerJson: "${{ toJson(runner)}}"
+      run: |
+        echo $runnerJson

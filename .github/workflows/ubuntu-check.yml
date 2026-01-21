@@ -17,6 +17,9 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4
 
+    - name: call action
+      uses: ./.github/actions/clean-artifacts
+
     - name: create github.json
       env:
         githubJson : ${{ toJson(github) }}

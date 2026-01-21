@@ -1,4 +1,5 @@
 name: hello
+description: hello
 
 runs:
   using: composite
