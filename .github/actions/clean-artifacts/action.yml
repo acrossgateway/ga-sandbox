@@ -1,5 +1,13 @@
-name: cleanup-artifacts
-description: hello
+# clean artifactsアクション (Composite)
+# 処理内容:
+#   - 指定されたrun_idで作成された成果物を全て削除
+#   - actions/github-scriptを使用してGitHub APIを呼び出し
+# パラメータ:
+#   - gh-token: GitHub Token
+# outputs: なし
+
+name: 'clean artifacts'
+description: 'Clean Artifacts Action'
 
 inputs:
   gh-token:
@@ -8,49 +16,43 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: cleanup-from-linux-runner
-      if: ${{ runner.os }} == 'Linux'
-      id: cleanup-on-linux
-      shell: bash
-      env: 
-        runnerJson: "${{ toJson(runner)}}"
-        GH_TOKEN: "${{ inputs.gh-token }}"
-      run: |
-        echo $runnerJson
-        echo ${{ github.run_id }}
-        echo ${{ github.repository }}
-
-        ARTIFACT_IDS=$(gh api repos/${{ github.repository }}/actions/artifacts --jq ".artifacts[] | select(.workflow_run.id == ${{ github.run_id }}) | .id")
-        
-        for ID in $ARTIFACT_IDS; do
-          if [ -n "$ID" ]; then
-            echo "Deleting artifact ID: $ID"
-            gh api repos/${{ github.repository }}/actions/artifacts/$ID -X DELETE
-          fi
-        done
-
-    - name: cleanup-from-windows-runner
-      if: ${{ runner.os }} == 'Windows'
-      id: cleanup-on-windows
-      shell: pwsh
-      env: 
-        runnerJson: "${{ toJson(runner)}}"
-        GH_TOKEN: "${{ inputs.gh-token }}"
-      run: |
-        echo $runnerJson
-        echo ${{ github.run_id }}
-        echo ${{ github.repository }}
-
-        $artifacts = gh api "repos/${{ github.repository }}/actions/artifacts" --jq ".artifacts[] | select(.workflow_run.id == ${{ github.run_id }}) | .id" | ConvertFrom-Json
-
-        if ( -not $artifacts) {
-          echo "no artifacts found for run ${{ github.run_id }}"
-        }
-        
-        foreach($id in $artifacts) {
-          if ($id) {
-            echo "Deleting artifact ID: $ID"
-            gh api "repos/${{ github.repository }}/actions/artifacts/$id" -X DELETE
+    - name: clean artifacts
+      uses: actions/github-script@v7
+      env:
+        RUN_ID: ${{ github.run_id }}
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const runId = parseInt(process.env.RUN_ID);
+          const [owner, repo] = '${{ github.repository }}'.split('/');
+          
+          console.log(`Fetching artifacts for run ID: ${runId}`);
+          
+          // 対象のワークフロー実行で作成された成果物を取得
+          const { data: artifacts } = await github.rest.actions.listArtifactsForRepo({
+            owner,
+            repo
+          });
+          
+          const targetArtifacts = artifacts.artifacts.filter(
+            artifact => artifact.workflow_run.id === runId
+          );
+          
+          if (targetArtifacts.length === 0) {
+            console.log(`No artifacts found for run ID: ${runId}`);
+            return;
           }
-        }
-        
+          
+          console.log(`Found ${targetArtifacts.length} artifact(s) to delete`);
+          
+          // 各成果物を削除
+          for (const artifact of targetArtifacts) {
+            console.log(`Deleting artifact: ${artifact.name} (ID: ${artifact.id})`);
+            await github.rest.actions.deleteArtifact({
+              owner,
+              repo,
+              artifact_id: artifact.id
+            });
+          }
+          
+          console.log('All artifacts deleted successfully');
