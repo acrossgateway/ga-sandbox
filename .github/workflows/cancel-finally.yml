@@ -23,12 +23,12 @@ jobs:
     - name: create files
       env:
         githubJson : ${{ toJson(github) }}
-        vender : ${{ inputs.vender }}
       run: |
         echo $githubJson |jq . > github.json
-        echo $vender > vender.txt
-        echo "run_url:${{ github.server_url }}//${{ github.repository }}/actions/runs/${{ github.run_id }}" > summary.txt
-        echo "job_number:${{ github.run_number }" >> summary.txt
+        echo ${{ inputs.vender }} > vender.txt
+        echo "run url:${{ github.server_url }}//${{ github.repository }}/actions/runs/${{ github.run_id }}" > summary.txt
+        echo "run number:${{ github.run_number }}" >> summary.txt
+        echo "executed by":${{ github.actor }}
         
 
     - name: short sleep
@@ -45,6 +45,9 @@ jobs:
         stepsJson: ${{ toJson(steps) }}
       run: |
         ls -la
+        echo "## Paramertes"
+        echo "vender: ${{ inputs.vender }}"
+        echo "## Results"
         cat summary.txt >> $GITHUB_STEP_SUMMARY
         echo "stepsJson" >> $GITHUB_STEP_SUMMARY
 
