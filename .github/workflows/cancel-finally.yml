@@ -41,15 +41,13 @@ jobs:
 
     - name: create summary
       if: ${{ always() }}
-      env: 
-        stepsJson: ${{ toJson(steps) }}
       run: |
         ls -la
         echo "## Paramertes"
         echo "vender: ${{ inputs.vender }}"
         echo "## Results"
         cat summary.txt >> $GITHUB_STEP_SUMMARY
-        echo "$stepsJson" >> $GITHUB_STEP_SUMMARY
+        echo "${{ toJson(steps) }}" >> $GITHUB_STEP_SUMMARY
 
     - name: finally
       if: ${{ always() }}
