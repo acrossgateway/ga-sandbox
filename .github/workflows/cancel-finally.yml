@@ -29,7 +29,7 @@ jobs:
         echo $vender > vender.txt
         echo "run_url:${{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > summary.txt
         echo "job_number:${{ github.run_number }" >> summary.txt
-        echo "executed by:${{ github.actor }}"  >> summary.txt
+        echo "executed:${{ github.actor }}"  >> summary.txt
 
     - name: short sleep
       run: sleep 300
