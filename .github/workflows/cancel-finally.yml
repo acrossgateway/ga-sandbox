@@ -37,7 +37,7 @@ jobs:
       run: sleep 10
 
     - name: canceled summary
-      if: ${{ steps.sleep.outcome == 'cancelled' }}
+      if: ${{ always() && steps.sleep.outcome == 'cancelled' }}
       id: canceled-summary
       run: |
         echo "${{ toJson(steps.sleep) }}"
