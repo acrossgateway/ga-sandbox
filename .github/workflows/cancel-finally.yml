@@ -39,21 +39,21 @@ jobs:
         ls -la
         echo "### Build Successful! 🚀" >> $GITHUB_STEP_SUMMARY
 
-- name: create summary
-  if: ${{ always() }}
-  run: |
-    {
-      echo "## Parameters"
-      echo "vender: ${{ inputs.vender }}"
-      echo ""
-      echo "## Results"
-      cat summary.txt
-      echo ""
-      echo "## Steps"
-      echo '```json'
-      echo '${{ toJson(steps) }}' | jq .
-      echo '```'
-    } >> $GITHUB_STEP_SUMMARY
+    - name: create summary
+      if: ${{ always() }}
+      run: |
+        {
+          echo "## Parameters"
+          echo "vender: ${{ inputs.vender }}"
+          echo ""
+          echo "## Results"
+          cat summary.txt
+          echo ""
+          echo "## Steps"
+          echo '```json'
+          echo '${{ toJson(steps) }}' | jq .
+          echo '```'
+        } >> $GITHUB_STEP_SUMMARY
 
     - name: finally
       if: ${{ always() }}
