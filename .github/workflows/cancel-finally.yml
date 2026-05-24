@@ -27,13 +27,24 @@ jobs:
       run: |
         echo $githubJson |jq . > github.json
         echo $vender > vender.txt
+        echo "run_url:${{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > summary.txt
+        echo "job_number:${{ github.run_number }" >> summary.txt
+        echo "executed by":${{ github.actor }}"  >> summary.txt
 
     - name: short sleep
       run: sleep 300
 
-    - name: list files
+    - name: success summary
+      run: |
+        ls -la
+        echo "### Build Successful! 🚀" >> $GITHUB_STEP_SUMMARY
+
+    - name: create summary
       if: ${{ always() }}
-      run: ls -la
+      run: |
+        ls -la
+        cat summary.txt >> $GITHUB_STEP_SUMMARY
+        echo "${{ toJson(steps) }}" >> $GITHUB_STEP_SUMMARY
 
     - name: finally
       if: ${{ always() }}
