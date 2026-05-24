@@ -27,7 +27,9 @@ jobs:
       run: |
         echo $githubJson |jq . > github.json
         echo $vender > vender.txt
-        echo "run_url:${{ github.server_url }}/${{ github.repository_owner }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > summary.txt
+        echo "run_url:${{ github.server_url }}//${{ github.repository }}/actions/runs/${{ github.run_id }}" > summary.txt
+        echo "job_number:${{ github.run_number }" >> summary.txt
+        
 
     - name: short sleep
       run: sleep 300
@@ -39,10 +41,12 @@ jobs:
 
     - name: create summary
       if: ${{ always() }}
+      env: 
+        stepsJson: ${{ toJson(steps) }}
       run: |
         ls -la
         cat summary.txt >> $GITHUB_STEP_SUMMARY
-        echo "${{ toJson(steps) }}" >> $GITHUB_STEP_SUMMARY
+        echo "stepsJson" >> $GITHUB_STEP_SUMMARY
 
     - name: finally
       if: ${{ always() }}
