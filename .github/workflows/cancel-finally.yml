@@ -37,7 +37,7 @@ jobs:
       run: sleep 10
 
     - name: canceled summary
-      if: ${{ always() && steps.sleep.outcome == 'cancelled' }}
+      if: always() && steps.sleep.outcome == 'cancelled'
       id: canceled-summary
       run: |
         echo "${{ toJson(steps.sleep) }}"
@@ -46,7 +46,7 @@ jobs:
 
     - name: create summary
       id: create-summary
-      if: ${{ always() }}
+      if: always()
       run: |
         {
           echo "## Parameters"
