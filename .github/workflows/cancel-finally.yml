@@ -32,15 +32,15 @@ jobs:
       run: sleep 300
 
     - name: list files
+      if: ${{ always() }}
       run: ls -la
 
     - name: finally
-      if always()
-    - uses: actions/upload-artifact@v7
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v7
       with:
         path:
          - github.json
          - vender.txt
         retention-days: 1
         compression-level: 0
-
