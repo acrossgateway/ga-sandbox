@@ -1,0 +1,46 @@
+name: Manual workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      vender:
+        type: choice
+        required: true
+        default: 'apple'
+        options:
+          - 'apple'
+          - 'google'
+
+jobs:
+  pipeline:
+    timeout-minutes: 7200
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v6
+
+    - name: create files
+      env:
+        githubJson : ${{ toJson(github) }}
+        vender : ${{ inputs.vender }}
+      run: |
+        echo $githubJson |jq . > github.json
+        echo $vender > vender.txt
+
+    - name: short sleep
+      run: sleep 300
+
+    - name: list files
+      run: ls -la
+
+    - name: finally
+      if always()
+    - uses: actions/upload-artifact@v7
+      with:
+        path:
+         - github.json
+         - vender.txt
+        retention-days: 1
+        compression-level: 0
+
