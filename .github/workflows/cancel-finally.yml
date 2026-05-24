@@ -32,14 +32,19 @@ jobs:
         
 
     - name: short sleep
+      id: sleep
       run: sleep 300
 
     - name: success summary
+      if: ${{ always() }}
+      id: success-summary
       run: |
+        echo ${{ toJson(steps.sleep) }}
         ls -la
         echo "### Build Successful! 🚀" >> $GITHUB_STEP_SUMMARY
 
     - name: create summary
+      id: create-summary
       if: ${{ always() }}
       run: |
         {
@@ -55,7 +60,8 @@ jobs:
           echo '```'
         } >> $GITHUB_STEP_SUMMARY
 
-    - name: finally
+    - name: upload artifact
+      id: upload-artifact
       if: ${{ always() }}
       uses: actions/upload-artifact@v7
       with:
