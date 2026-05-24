@@ -28,7 +28,7 @@ jobs:
         echo ${{ inputs.vender }} > vender.txt
         echo "run url:${{ github.server_url }}//${{ github.repository }}/actions/runs/${{ github.run_id }}" > summary.txt
         echo "run number:${{ github.run_number }}" >> summary.txt
-        echo "executed by":${{ github.actor }}
+        echo "executed by":${{ github.actor }} >> summary.txt
         
 
     - name: short sleep
@@ -39,15 +39,21 @@ jobs:
         ls -la
         echo "### Build Successful! 🚀" >> $GITHUB_STEP_SUMMARY
 
-    - name: create summary
-      if: ${{ always() }}
-      run: |
-        ls -la
-        echo "## Paramertes"
-        echo "vender: ${{ inputs.vender }}"
-        echo "## Results"
-        cat summary.txt >> $GITHUB_STEP_SUMMARY
-        echo "${{ toJson(steps) }}" >> $GITHUB_STEP_SUMMARY
+- name: create summary
+  if: ${{ always() }}
+  run: |
+    {
+      echo "## Parameters"
+      echo "vender: ${{ inputs.vender }}"
+      echo ""
+      echo "## Results"
+      cat summary.txt
+      echo ""
+      echo "## Steps"
+      echo '```json'
+      echo '${{ toJson(steps) }}' | jq .
+      echo '```'
+    } >> $GITHUB_STEP_SUMMARY
 
     - name: finally
       if: ${{ always() }}
