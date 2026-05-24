@@ -37,7 +37,7 @@ jobs:
       run: sleep 10
 
     - name: canceled summary
-      if: ${{ steps.sleep.conclusion }} == "canceled"
+      if: ${{ steps.sleep.outcome }} == "canceled"
       id: canceled-summary
       run: |
         echo "${{ toJson(steps.sleep) }}"
@@ -57,7 +57,9 @@ jobs:
           echo ""
           echo "## Steps"
           echo '```json'
-          echo 'crate files: ${{ toJson(steps.create-files) }}' | jq .
+          echo 'crate files:'
+          echo '${{ toJson(steps.create-files) }}' | jq .
+          echo 'sleep:'
           echo 'sleep: ${{ toJson(steps.sleep) }}' | jq .
           echo '```'
         } >> $GITHUB_STEP_SUMMARY
