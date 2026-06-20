@@ -16,7 +16,9 @@ runs:
           ${{ inputs.json }}
         "@
 
-        echo @"
+        $compact = echo @"
           ${{ inputs.json }}
-        "@ |jq -c
+        "@ |jq . -c
+
+        echo $compact
         
