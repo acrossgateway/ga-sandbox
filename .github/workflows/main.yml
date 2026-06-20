@@ -1,0 +1,32 @@
+name: main
+
+on:
+  workflow_dispatch:
+
+jobs:
+  call:
+    runs-on: windows-latest
+
+    steps:
+    - name: checkout
+      id: checkout
+      uses: actions/checkout@v6
+
+    - name: call json param
+      id: call
+      uses: ./.github/actions/json-param
+      with:
+        json: |
+          {
+            arrays: [
+              {
+                "id": "1",
+                "name": "john"
+              },
+              {
+                "id": "2",
+                "name": "mark"
+              }              
+            ]
+          }
+

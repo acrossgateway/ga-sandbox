@@ -1,0 +1,15 @@
+name: json-param
+description: echo json param
+
+inputs:
+  json:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: echo
+      id: echo
+      shell: pwsh
+      run: |
+        echo ${{ inputs.json }}
