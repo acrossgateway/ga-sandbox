@@ -12,4 +12,11 @@ runs:
       id: echo
       shell: pwsh
       run: |
-        echo ${{ inputs.json }}
+        echo @"
+          ${{ inputs.json }}
+        "@
+
+        echo @"
+          ${{ inputs.json }}
+        "@ |jq -c
+        
