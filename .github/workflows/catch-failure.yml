@@ -44,13 +44,16 @@ jobs:
         exit ${{ inputs.prepare-exit-code }}
 
     - name: x64-compile
-      id: app-compile
+      id: x64-compile
+      continue-on-error: true
       shell: pwsh
       run: |
         echo "x64-compile"
         exit ${{ inputs.x64-exit-code }}
 
     - name: x86-compile
+      continue-on-error: true
+      if: ${{ always() && steps.x64-compile.outcome == 'success' }}
       id: x86-compile
       shell: pwsh
       run: |
@@ -58,6 +61,8 @@ jobs:
         exit ${{ inputs.x86-exit-code }}
 
     - name: arm64-compile
+      continue-on-error: true
+      if: ${{ always() && steps.x86-compile.outcome == 'success' }}
       id: arm64-compile
       shell: pwsh
       run: |
@@ -65,6 +70,8 @@ jobs:
         exit ${{ inputs.arm64-exit-code }}
 
     - name: arm-compile
+      continue-on-error: true
+      if: ${{ always() && steps.arm64-compile.outcome == 'success' }}
       id: arm-compile
       shell: pwsh
       run: |
