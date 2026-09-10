@@ -2,6 +2,23 @@ name: catch fairue
 
 on:
   workflow_dispatch:
+    inputs:
+      prepare-exit-code:
+        required: true
+        default: 0
+      x64-exit-code:
+        required: true
+        default: 0
+      x86-exit-code:
+        required: true
+        default: 0
+      arm64-exit-code:
+        required: true
+        default: 0
+      arm-exit-code:
+        required: true
+        default: 0
+
 
 jobs:
   call:
@@ -17,30 +34,35 @@ jobs:
       shell: pwsh
       run: |
         echo "prepare-compile"
+        exit ${{ inputs.prepare-exit-code }}
     
     - name: x64-compile
       id: app-compile
       shell: pwsh
       run: |
         echo "x64-compile"
+        exit ${{ inputs.x64-exit-code }}
 
     - name: x86-compile
       id: x86-compile
       shell: pwsh
       run: |
         echo "x86-compile"
+        exit ${{ inputs.x86-exit-code }}
 
     - name: arm64-compile
       id: arm64-compile
       shell: pwsh
       run: |
         echo "arm64-compile"
+        exit ${{ inputs.arm64-exit-code }}
 
     - name: arm-compile
       id: arm-compile
       shell: pwsh
       run: |
         echo "arm-compile"
+        exit ${{ inputs.arm-exit-code }}
 
     - name: catch-error
       if: ${{ always() }}
