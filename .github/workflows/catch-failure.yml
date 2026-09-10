@@ -62,14 +62,14 @@ jobs:
 
     - name: deploy
       id: deploy
-      if: ${{ always && steps.catch-error.outputs.compile-error == 'false' }}
+      if: ${{ always() && steps.catch-error.outputs.compile-error == 'false' }}
       shell: pwsh
       run: |
         echo "update-history"
 
     - name: update-history
       id: update-history
-      if: ${{ always && steps.catch-error.outputs.compile-error }}
+      if: ${{ always() && steps.catch-error.outputs.compile-error }}
       shell: pwsh
       run: |
         echo "update-history"
