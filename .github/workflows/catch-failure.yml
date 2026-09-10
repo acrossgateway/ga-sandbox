@@ -64,39 +64,21 @@ jobs:
         echo "arm-compile"
         exit ${{ inputs.arm-exit-code }}
 
-    - name: catch-error
-      if: ${{ always() }}
-      id: catch-error
-      shell: pwsh
-      run: |
-        $outcomes = @(
-          "${{ steps.x64-compile.outcome }}",
-          "${{ steps.x86-compile.outcome }}",
-          "${{ steps.arm64-compile.outcome }}",
-          "${{ steps.arm-compile.outcome }}"
-        )
-        $failCount = ($outcomes | Where-Object { $_ -eq 'failure' }).Count
-        if ($failCount -gt 0) {
-          echo "compile-error=true" >> $env:GITHUB_OUTPUT
-        } else {
-          echo "compile-error=false" >> $env:GITHUB_OUTPUT
-        }
-
-    - name: deploy
-      id: deploy
-      if: ${{ always() && steps.catch-error.outputs.compile-error == 'false' }}
+    - name: update-history
+      id: update-history
+      if: ${{ always() && steps.prepare-compile.outcome == 'success' }}
       shell: pwsh
       run: |
         echo "update-history"
 
-    - name: update-history
-      id: update-history
-      if: ${{ always() && steps.catch-error.outputs.compile-error }}
+    - name: deploy
+      id: deploy
       shell: pwsh
       run: |
         echo "update-history"
 
     - name: post
+      if: ${{ always }}
       id: post
       shell: pwsh
       run: |
