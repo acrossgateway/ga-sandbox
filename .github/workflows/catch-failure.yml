@@ -1,0 +1,81 @@
+name: catch fairue
+
+on:
+  workflow_dispatch:
+
+jobs:
+  call:
+    runs-on: windows-latest
+
+    steps:
+    - name: checkout
+      id: checkout
+      uses: actions/checkout@v6
+
+    - name: prepare-compile
+      id: prepare-compile
+      shell: pwsh
+      run: |
+        echo "prepare-compile"
+    
+    - name: x64-compile
+      id: app-compile
+      shell: pwsh
+      run: |
+        echo "x64-compile"
+
+    - name: x86-compile
+      id: x86-compile
+      shell: pwsh
+      run: |
+        echo "x86-compile"
+
+    - name: arm64-compile
+      id: arm64-compile
+      shell: pwsh
+      run: |
+        echo "arm64-compile"
+
+    - name: arm-compile
+      id: arm-compile
+      shell: pwsh
+      run: |
+        echo "arm-compile"
+
+    - name: catch-error
+      if: ${{ always() }}
+      id: catch-error
+      shell: pwsh
+      run: |
+        $outcomes = @(
+          "${{ steps.x64-compile.outcome }}",
+          "${{ steps.x86-compile.outcome }}",
+          "${{ steps.arm64-compile.outcome }}",
+          "${{ steps.arm-compile.outcome }}"
+        )
+        $failCount = ($outcomes | Where-Object { $_ -eq 'failure' }).Count
+        if ($failCount -gt 0) {
+          echo "compile-error=true" >> $env:GITHUB_OUTPUT
+        } else {
+          echo "compile-error=false" >> $env:GITHUB_OUTPUT
+        }
+
+    - name: deploy
+      id: deploy
+      if: ${{ always && steps.catch-error.outputs.compile-error == "false" }}
+      shell: pwsh
+      run: |
+        echo "update-history"
+
+    - name: update-history
+      id: update-history
+      if: ${{ always && steps.catch-error.outputs.compile-error }}
+      shell: pwsh
+      run: |
+        echo "update-history"
+
+    - name: post
+      id: post
+      shell: pwsh
+      run: |
+        echo "post"
