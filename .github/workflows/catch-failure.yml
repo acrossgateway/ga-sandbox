@@ -78,7 +78,7 @@ jobs:
         echo "update-history"
 
     - name: post
-      if: ${{ always }}
+      if: ${{ always() }}
       id: post
       shell: pwsh
       run: |
