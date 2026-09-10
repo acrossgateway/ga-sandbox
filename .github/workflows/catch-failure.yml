@@ -36,6 +36,13 @@ jobs:
         echo "prepare-compile"
         exit ${{ inputs.prepare-exit-code }}
     
+    - name: allow-update-history
+      id: allow-update-history
+      shell: pwsh
+      run: |
+        echo "compile env is ready. update-history is allowed to run "
+        exit ${{ inputs.prepare-exit-code }}
+
     - name: x64-compile
       id: app-compile
       shell: pwsh
@@ -66,7 +73,7 @@ jobs:
 
     - name: update-history
       id: update-history
-      if: ${{ always() && steps.prepare-compile.outcome == 'success' }}
+      if: ${{ always() && steps.allow-update-history.outcome == 'success' }}
       shell: pwsh
       run: |
         echo "update-history"
