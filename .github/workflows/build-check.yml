@@ -1,0 +1,135 @@
+name: build-check-with-conditions
+
+on:
+  workflow_dispatch:
+    inputs:
+      setup:
+        required: true
+        default: 0
+
+      x86:
+        required: true
+        default: 0
+
+      x64:
+        required: true
+        default: 0
+
+      arm86:
+        required: true
+        default: 0
+
+      arm64:
+        required: true
+        default: 0
+
+      line-count:
+        required: true
+        default: 0
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+      
+      - name: setup
+        id: setup
+        shell: pwsh
+        run: |
+          echo "Setting up the build environment..."
+          exit ${{ inputs.setup }}
+
+      - name: build-x86
+        id: build-x86
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          echo "Building for x86..."
+          exit ${{ inputs.x86 }}
+
+      - name: build-x64
+        if: ${{ always() && steps.build-x86.outcome == 'success' }}
+        id: build-x64
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          echo "Building for x64..."
+          exit ${{ inputs.x64 }}
+
+      - name: build-arm64
+        if: ${{ always() && steps.build-x64.outcome == 'success' }}
+        id: build-arm64
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          echo "Building for arm64..."
+          exit ${{ inputs.arm64 }}
+
+      - name: build-arm86
+        if: ${{ always() && steps.build-arm64.outcome == 'success' }}
+        id: build-arm86
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          echo "Building for arm86..."
+          exit ${{ inputs.arm86 }}
+
+      - name: build-summary
+        if: ${{ always() }}
+        id: build-summary
+        shell: pwsh
+        run: |
+          $buildResults = @(
+            @{ Name = "x86"; Result = "${{ steps.build-x86.outcome }}" },
+            @{ Name = "x64"; Result = "${{ steps.build-x64.outcome }}" },
+            @{ Name = "arm64"; Result = "${{ steps.build-arm64.outcome }}" },
+            @{ Name = "arm86"; Result = "${{ steps.build-arm86.outcome }}" }
+          )
+
+          $hasFailures = $false
+          foreach ($result in $buildResults) {
+            if ($result.Result -ne "success") {
+              $hasFailures = $true
+            }
+          }
+
+          if ($hasFailures) {
+            echo "has-failures=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "has-failures=false" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: line-count
+        id: line-count
+        continue-on-error: true
+        if: ${{ always() && steps.setup.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          echo "Counting lines of code..."
+          exit ${{ inputs.line-count }}
+
+      # ビルドチェックに失敗した場合はデプロイをスキップする
+      - name: deploy
+        if: ${{ always() && steps.build-summary.outputs.has-failures == 'false' }}
+        shell: pwsh
+        run: |
+          echo "Deploying the build artifacts..."
+      
+      - name: post-build-summary
+        if: ${{ always() }}
+        shell: pwsh
+        run: |
+          @"
+          ## Post-build summary
+          - Setup step outcome: ${{ steps.setup.outcome }}
+          - x86 build outcome: ${{ steps.build-x86.outcome }}
+          - x64 build outcome: ${{ steps.build-x64.outcome }}
+          - arm64 build outcome: ${{ steps.build-arm64.outcome }}
+          - arm86 build outcome: ${{ steps.build-arm86.outcome }}
+          - build summary outcome: ${{ steps.build-summary.outcome }}
+          - build summary has failures: ${{ steps.build-summary.outputs.has-failures }}
+          - Line count step outcome: ${{ steps.line-count.outcome }}
+          - Deploy step outcome: ${{ steps.deploy.outcome }}
+          "@ >> $env:GITHUB_STEP_SUMMARY
