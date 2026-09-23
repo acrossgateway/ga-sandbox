@@ -1,0 +1,38 @@
+name: print github env
+
+on:
+  push:
+
+jobs:
+  print-env:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      id: checkout
+      uses: actions/checkout@v6
+
+    - name: print github object to github summary
+      id: summary
+      shell: bash
+      env:
+        GITHUB_CONTEXT: ${{ toJSON(github) }}
+      run: |
+        {
+          echo "## \`github\` context summary"
+          echo ""
+          echo "| Key | Value |"
+          echo "| --- | --- |"
+          echo "$GITHUB_CONTEXT" | jq -r '
+            to_entries[]
+            | "| `" + .key + "` | " + ((.value | tojson) | gsub("\\|"; "\\|")) + " |"
+          '
+          echo ""
+          echo "<details><summary>Full JSON (pretty)</summary>"
+          echo ""
+          echo '```json'
+          echo "$GITHUB_CONTEXT" | jq '.'
+          echo '```'
+          echo ""
+          echo "</details>"
+        } >> "$GITHUB_STEP_SUMMARY"
