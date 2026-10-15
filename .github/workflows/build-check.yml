@@ -119,10 +119,16 @@ jobs:
       
       - name: post-build-summary
         if: ${{ always() }}
+        env:
+          STEPS_JSON: ${{ toJson(steps) }}
         shell: pwsh
         run: |
           @"
-          ## Post-build summary
+          ### STEPS JSON
+          ```
+          ${{ env.STEPS_JSON }}
+          ```
+          ### Post-build summary
           - Setup step outcome: ${{ steps.setup.outcome }}
           - x86 build outcome: ${{ steps.build-x86.outcome }}
           - x64 build outcome: ${{ steps.build-x64.outcome }}
